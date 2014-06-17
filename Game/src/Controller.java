@@ -10,9 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.TimerTask;
 
-/**
- * Created by sn0wsky on 16.06.14.
- */
 public class Controller {
     public static JFrame frame;
     public static JPanel table;
@@ -54,7 +51,7 @@ public class Controller {
         table.addKeyListener(menuKeyAdapter);
     }
 
-    public void showPause(){
+    public void showPause() {
         try {
             pauseResume = ImageIO.read(new File("img/pause_resume.png"));
             pauseNewGame = ImageIO.read(new File("img/pause_new_game.png"));
@@ -71,7 +68,7 @@ public class Controller {
     }
 
     public void newGame() {
-        firstStart=true;
+        firstStart = true;
         desk = new Desk();
         final Ball ball = new Ball(desk);
         bot = new DeskBot(ball);
@@ -91,14 +88,13 @@ public class Controller {
                     //incfps();
                     tempGraphics.setFont(new Font("Arial", Font.BOLD, 30));
                     tempGraphics.setColor(Color.white);
-                    tempGraphics.drawString("You "+scoreYou+" : "+scoreBot+" Bot", 150, 30);
-                    if(ball.checkLose()==1){
-                        scoreBot+=1;
+                    tempGraphics.drawString("You " + scoreYou + " : " + scoreBot + " Bot", 150, 30);
+                    if (ball.checkLose() == 1) {
+                        scoreBot += 1;
                         timer.cancel();
                         newGame();
-                    }
-                    else if(ball.checkLose()==2){
-                        scoreYou+=1;
+                    } else if (ball.checkLose() == 2) {
+                        scoreYou += 1;
                         timer.cancel();
                         newGame();
                     }
@@ -108,10 +104,10 @@ public class Controller {
                     //    now = System.currentTimeMillis();
                     //}
                     table.getGraphics().drawImage(temp, 0, 0, null);
-                    if(firstStart){
+                    if (firstStart) {
                         try {
                             Thread.sleep(300);
-                            firstStart=false;
+                            firstStart = false;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -180,19 +176,18 @@ public class Controller {
         }
     };
 
-// ----------------------Pause Adapter--------------------------
+    // ----------------------Pause Adapter--------------------------
     KeyAdapter pauseKeyAdapter = new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_UP){
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
                 pauseChoosed -= 1;
             }
-            if (e.getKeyCode() == KeyEvent.VK_DOWN){
+            if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                 pauseChoosed += 1;
             }
-            if (pauseChoosed == -1){
+            if (pauseChoosed == -1) {
                 pauseChoosed = 2;
-            }
-            else if (pauseChoosed == 3){
+            } else if (pauseChoosed == 3) {
                 pauseChoosed = 0;
             }
             Graphics2D g2 = (Graphics2D) table.getGraphics();
@@ -201,6 +196,8 @@ public class Controller {
                     g2.drawImage(temp, 0, 0, null);
                     g2.drawImage(pauseResume, 0, 0, null);
                 } else if (pauseChoosed == 1) {
+                    scoreYou = 0;
+                    scoreBot = 0;
                     g2.drawImage(temp, 0, 0, null);
                     g2.drawImage(pauseNewGame, 0, 0, null);
                 } else if (pauseChoosed == 2) {
@@ -209,20 +206,18 @@ public class Controller {
                 }
             }
 
-            if (e.getKeyCode() == KeyEvent.VK_ENTER){
-                if (pauseChoosed == 0){
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (pauseChoosed == 0) {
                     isPaused = false;
                     table.removeKeyListener(pauseKeyAdapter);
                     table.addKeyListener(gameKeyAdapter);
-                }
-                else if (pauseChoosed == 1){
+                } else if (pauseChoosed == 1) {
                     isPaused = false;
                     table.removeKeyListener(pauseKeyAdapter);
                     table.addKeyListener(gameKeyAdapter);
                     timer.cancel();
                     newGame();
-                }
-                else if (pauseChoosed == 2){
+                } else if (pauseChoosed == 2) {
                     System.exit(0);
                 }
             }
@@ -240,7 +235,7 @@ public class Controller {
                 rightPressed = true;
             }
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                if (!isPaused){
+                if (!isPaused) {
                     isPaused = true;
                     showPause();
                 }
@@ -260,7 +255,6 @@ public class Controller {
         }
 
     };
-
 
 
 }
