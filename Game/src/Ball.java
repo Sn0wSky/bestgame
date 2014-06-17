@@ -77,6 +77,9 @@ public class Ball {
                     angle -= 15;
                 }
             }
+            if(desk1.getMoveInt()==0){
+                angle = 180-angle;
+            }
 
         }
         else if (x>=desk2.getLeft()-radius/2 && x<=desk2.getRight()-radius/2 && y<=desk2.getTop()-radius/2){
