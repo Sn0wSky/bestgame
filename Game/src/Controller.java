@@ -17,7 +17,7 @@ public class Controller {
     int maxfps = 0;
     long now;
     Desk desk;
-    DeskBot bot;
+    Bot bot;
     java.util.Timer timer;
     boolean isPaused = false;
     boolean firstStart = true;
@@ -28,10 +28,16 @@ public class Controller {
     BufferedImage menuStart = null;
     BufferedImage menuExit = null;
 
+    int pauseStage = 0;
+
     int pauseChoosed = 0;
     BufferedImage pauseResume = null;
     BufferedImage pauseNewGame = null;
     BufferedImage pauseExit = null;
+
+    int botChoosed = 0;
+    BufferedImage difEasy = null;
+    BufferedImage difHard = null;
 
     String score = "You 0 : 0 Bot";
     int scoreYou = 0;
@@ -64,28 +70,48 @@ public class Controller {
         g2.drawImage(pauseResume, 0, 0, null);
         table.removeKeyListener(gameKeyAdapter);
         table.addKeyListener(pauseKeyAdapter);
+    }
 
+    public void showDifficultyChooser() {
+        try {
+            difEasy = ImageIO.read(new File("img/difficulty_easy.png"));
+            difHard = ImageIO.read(new File("img/difficulty_hard.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Graphics2D g2 = (Graphics2D) table.getGraphics();
+        g2.drawImage(temp, 0, 0, null);
+        g2.drawImage(difEasy, 0, 0, null);
     }
 
     public void newGame() {
         firstStart = true;
         desk = new Desk();
         final Ball ball = new Ball(desk);
-        bot = new DeskBot(ball);
+        if (botChoosed == 0) {
+            bot = new DeskBot(ball);
+        } else {
+            bot = new DeskBotHard(ball);
+        }
         ball.setBotDesk(bot);
-        //now = System.currentTimeMillis();
+        BufferedImage tempReadBg = null;
+        try {
+            tempReadBg = ImageIO.read(new File("img/game_bg.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final BufferedImage bg = tempReadBg;
         timer = new java.util.Timer();
         TimerTask task = new TimerTask() {
             public void run() {
                 if (!isPaused) {
-
                     temp = new BufferedImage(500, 700, BufferedImage.TYPE_INT_RGB);
                     Graphics2D tempGraphics = (Graphics2D) temp.getGraphics();
+                    tempGraphics.drawImage(bg, 0, 0, null);
                     ball.move();
                     ball.draw(tempGraphics);
                     desk.draw(tempGraphics);
                     bot.draw(tempGraphics);
-                    //incfps();
                     tempGraphics.setFont(new Font("Arial", Font.BOLD, 30));
                     tempGraphics.setColor(Color.white);
                     tempGraphics.drawString("You " + scoreYou + " : " + scoreBot + " Bot", 150, 30);
@@ -98,11 +124,6 @@ public class Controller {
                         timer.cancel();
                         newGame();
                     }
-                    //if (-now + System.currentTimeMillis() > 1000) {
-                    //    maxfps = fps;
-                    //    fps = 0;
-                    //    now = System.currentTimeMillis();
-                    //}
                     table.getGraphics().drawImage(temp, 0, 0, null);
                     if (firstStart) {
                         try {
@@ -116,10 +137,6 @@ public class Controller {
             }
         };
         timer.schedule(task, 0, 10);
-    }
-
-    public void incfps() {
-        fps += 1;
     }
 
     boolean leftPressed = false;
@@ -167,8 +184,17 @@ public class Controller {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (startChoosed) {
                     table.removeKeyListener(menuKeyAdapter);
-                    table.addKeyListener(gameKeyAdapter);
+                    //table.addKeyListener(gameKeyAdapter);
                     newGame();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    isPaused = true;
+                    pauseStage = 1;
+                    table.addKeyListener(pauseKeyAdapter);
+                    showDifficultyChooser();
                 } else {
                     System.exit(0);
                 }
@@ -179,46 +205,75 @@ public class Controller {
     // ----------------------Pause Adapter--------------------------
     KeyAdapter pauseKeyAdapter = new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_UP) {
-                pauseChoosed -= 1;
-            }
-            if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                pauseChoosed += 1;
-            }
-            if (pauseChoosed == -1) {
-                pauseChoosed = 2;
-            } else if (pauseChoosed == 3) {
-                pauseChoosed = 0;
-            }
-            Graphics2D g2 = (Graphics2D) table.getGraphics();
-            if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                if (pauseChoosed == 0) {
-                    g2.drawImage(temp, 0, 0, null);
-                    g2.drawImage(pauseResume, 0, 0, null);
-                } else if (pauseChoosed == 1) {
-                    scoreYou = 0;
-                    scoreBot = 0;
-                    g2.drawImage(temp, 0, 0, null);
-                    g2.drawImage(pauseNewGame, 0, 0, null);
-                } else if (pauseChoosed == 2) {
-                    g2.drawImage(temp, 0, 0, null);
-                    g2.drawImage(pauseExit, 0, 0, null);
+            if (pauseStage == 0) {
+                if (e.getKeyCode() == KeyEvent.VK_UP) {
+                    pauseChoosed -= 1;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    pauseChoosed += 1;
+                }
+                if (pauseChoosed == -1) {
+                    pauseChoosed = 2;
+                } else if (pauseChoosed == 3) {
+                    pauseChoosed = 0;
+                }
+                Graphics2D g2 = (Graphics2D) table.getGraphics();
+                if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    if (pauseChoosed == 0) {
+                        g2.drawImage(temp, 0, 0, null);
+                        g2.drawImage(pauseResume, 0, 0, null);
+                    } else if (pauseChoosed == 1) {
+                        scoreYou = 0;
+                        scoreBot = 0;
+                        g2.drawImage(temp, 0, 0, null);
+                        g2.drawImage(pauseNewGame, 0, 0, null);
+                    } else if (pauseChoosed == 2) {
+                        g2.drawImage(temp, 0, 0, null);
+                        g2.drawImage(pauseExit, 0, 0, null);
+                    }
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (pauseChoosed == 0) {
+                        isPaused = false;
+                        table.removeKeyListener(pauseKeyAdapter);
+                        table.addKeyListener(gameKeyAdapter);
+                    } else if (pauseChoosed == 1) {
+                        pauseStage = 1;
+                        showDifficultyChooser();
+                        //isPaused = false;
+                        //table.removeKeyListener(pauseKeyAdapter);
+                        //table.addKeyListener(gameKeyAdapter);
+                        //timer.cancel();
+                        //newGame();
+                    } else if (pauseChoosed == 2) {
+                        System.exit(0);
+                    }
                 }
             }
-
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                if (pauseChoosed == 0) {
-                    isPaused = false;
-                    table.removeKeyListener(pauseKeyAdapter);
-                    table.addKeyListener(gameKeyAdapter);
-                } else if (pauseChoosed == 1) {
-                    isPaused = false;
+            else {
+                Graphics2D g2 = (Graphics2D) table.getGraphics();
+                if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN){
+                    if(botChoosed==0){
+                        //System.out.println(0);
+                        g2.drawImage(temp, 0, 0, null);
+                        g2.drawImage(difHard, 0, 0, null);
+                        botChoosed=1;
+                    }
+                    else{
+                        g2.drawImage(temp, 0, 0, null);
+                        g2.drawImage(difEasy, 0, 0, null);
+                        botChoosed=0;
+                    }
+                }
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    pauseStage = 0;
+                    isPaused=false;
                     table.removeKeyListener(pauseKeyAdapter);
                     table.addKeyListener(gameKeyAdapter);
                     timer.cancel();
                     newGame();
-                } else if (pauseChoosed == 2) {
-                    System.exit(0);
+
                 }
             }
         }

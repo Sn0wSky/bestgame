@@ -16,6 +16,7 @@ public class Desk {
     int moveInt = 0;
     BufferedImage deskImg;
 
+
     public Desk() {
         try {
             deskImg = ImageIO.read(new File("img/desk.png"));
@@ -48,7 +49,6 @@ public class Desk {
             x += 5;
         }
     }
-
     public int getMoveInt() {
         return moveInt;
     }

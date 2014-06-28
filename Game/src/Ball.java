@@ -13,9 +13,8 @@ public class Ball {
     int angle;
     int speed = 2;
     int radius = 20;
-    Color color;
     Desk desk1;
-    DeskBot desk2;
+    Bot desk2;
     boolean changed = false;
     BufferedImage ballImg;
     int losed = 0;
@@ -27,20 +26,27 @@ public class Ball {
             e.printStackTrace();
         }
         this.desk1 = desk1;
-        color = new Color(123, 255, 123);
         angle = (int) Math.round(Math.random() * 90 - 45);
-        speed = 5;
+        speed = 6;
         x = 500 / 2;
         y = 700 / 2;
         //radius = (int) Math.round(Math.random()*30+1);
         //System.out.println(angle);
 
     }
+    public Ball(int x, int y, int angle, int speed, int radius, Desk desk1, Bot desk2, boolean changed){
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.speed = speed;
+        this.radius = radius;
+        this.desk1 = desk1;
+        this.desk2 = desk2;
+        this.changed = changed;
+    }
 
     public void draw(Graphics2D imgGraph) {
-        imgGraph.setColor(color);
         imgGraph.drawImage(ballImg, x, y, null);
-
     }
 
     public void move() {
@@ -53,7 +59,7 @@ public class Ball {
         //}
         angle = angle % 360;
         if (x >= desk1.getLeft() - radius / 2 && x <= desk1.getRight() - radius / 2 && y >= desk1.getTop() - radius / 2) {
-            System.out.println(angle);
+            //System.out.println(angle);
             this.y = desk1.getTop() - radius / 2;
             if (desk1.getMoveInt() == 1) {
                 if (angle >= 0 && angle <= 90) {
@@ -82,9 +88,9 @@ public class Ball {
             if (desk1.getMoveInt() == 0) {
                 angle = 180 - angle;
             }
-
+            desk2.setUserKickTrue();
         } else if (x >= desk2.getLeft() - radius / 2 && x <= desk2.getRight() - radius / 2 && y <= desk2.getTop() - radius / 2) {
-            System.out.println(angle);
+            //System.out.println(angle);
             if (desk2.getMoveInt() == 1) {
                 if (angle >= 0 && angle <= 90) {
                     speed -= 2;
@@ -107,11 +113,11 @@ public class Ball {
             }
             angle = 180 - angle;
         }
-        if (speed <= 2) {
-            speed = 2;
+        if (speed <= 3) {
+            speed = 3;
         }
-        if (speed >= 6) {
-            speed = 6;
+        if (speed >= 9) {
+            speed = 9;
         }
 
         angle = angle % 360;
@@ -158,7 +164,11 @@ public class Ball {
         return y;
     }
 
-    public void setBotDesk(DeskBot desk) {
+    public void setBotDesk(Bot desk) {
         this.desk2 = desk;
+    }
+
+    public Ball getCopy(){
+        return new Ball(x,y,angle,speed,radius,desk1,desk2,changed);
     }
 }

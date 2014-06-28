@@ -4,19 +4,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class DeskBot  implements Bot  {
+public class DeskBotHard implements Bot {
     int x = 190;
     int y = 50;
     int width = 120;
     int height = 20;
     Color color = new Color(255, 0, 0);
     int moveInt = 0;
-    int speed = 4;
+    int speed = 2;
     BufferedImage deskImg;
     Ball ball;
+    Ball cleverBall;
+    int futureOfX = 0;
     boolean userKick = false;
+    boolean moveToBall = false;
+    int middleX = 0;
 
-    public DeskBot(Ball ball) {
+    public DeskBotHard(Ball ball) {
         try {
             deskImg = ImageIO.read(new File("img/desk.png"));
         } catch (IOException e) {
@@ -37,19 +41,32 @@ public class DeskBot  implements Bot  {
     }
 
     public void move() {
-        if (this.getLeft() <= 0 && moveInt == 1) {
-            this.setMoveInt(0);
-            x = 1;
-        } else if (this.getRight() >= 500 && moveInt == 2) {
-            this.setMoveInt(0);
-            x = 499 - width;
+        if (userKick) {
+            userKick = false;
+            cleverBall = ball.getCopy();
+            while (cleverBall.getY() >= this.getTop()) {
+                cleverBall.move();
+            }
+            futureOfX = cleverBall.getX();
+            moveToBall = true;
         }
-        if (this.getMoveInt() == 1) {
-            this.x -= speed;
+
+        if (moveToBall == true) {
+            if (Math.abs(futureOfX - getMiddleX()) > speed) {
+                if (futureOfX >= getMiddleX()) {
+                    this.x += speed;
+                } else {
+                    this.x -= speed;
+                }
+            }
+            else{
+                moveToBall = false;
+            }
         }
-        if (this.getMoveInt() == 2) {
-            this.x += speed;
-        }
+    }
+
+    public int getMiddleX() {
+        return (this.getLeft() + this.getRight()) / 2;
     }
 
     public int getMoveInt() {
@@ -72,5 +89,7 @@ public class DeskBot  implements Bot  {
         this.moveInt = num;
     }
 
-    public void setUserKickTrue(){ this.userKick = true; }
+    public void setUserKickTrue() {
+        this.userKick = true;
+    }
 }
